@@ -1,0 +1,9 @@
+.Rhistory
+.Rproj.user
+.env
+*.rds
+*.dta
+*.html
+*.pdf
+*.docx
+*.tex

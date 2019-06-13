@@ -1,0 +1,97 @@
+---
+title: "Preliminary Report"
+author: "Erik Westlund"
+date: "June 13, 2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("bootstrap.R")
+source("analysis/preliminary-analysis.R")
+```
+
+# Competence Mismatch
+
+I've got the project coded up in a reproducible way using the restricted data. Here are preliminary results.
+
+## Earned BA vs. Math-Reading Standardized Test Score Differences
+
+Math-Reading difference is significant.
+
+```{r}
+summary(earned_ba_standardized_test_score_model)
+exp(cbind(coef(earned_ba_standardized_test_score_model)))
+```
+
+
+## Earned BA vs. Math-Verbal SAT Score Differences
+
+Math-Verbal difference is significant.
+
+```{r}
+summary(earned_ba_sat_score_model)
+exp(cbind(coef(earned_ba_sat_score_model)))
+```
+
+## Transferred Colleges vs. Math-Reading Standardized Test Score Differences
+
+Math-Reading difference is *not* significant.
+
+```{r}
+summary(transferred_colleges_standardized_test_score_model)
+exp(cbind(coef(transferred_colleges_standardized_test_score_model)))
+```
+
+
+## Transferred Colleges  vs. Math-Verbal SAT Score Differences
+
+Math-Verbal difference is *not* significant.
+
+```{r}
+summary(transferred_colleges_sat_score_model)
+exp(cbind(coef(transferred_colleges_sat_score_model)))
+```
+
+
+## Applied to High Selective College vs. Math-Reading Standardized Test Score Differences
+
+Math-Reading difference is significant.
+
+```{r}
+summary(applied_to_highly_selective_college_standardized_test_score_model)
+exp(cbind(coef(applied_to_highly_selective_college_standardized_test_score_model)))
+```
+
+
+## Applied to High Selective College  vs. Math-Verbal SAT Score Differences
+
+Math-Verbal difference is significant.
+
+```{r}
+summary(applied_to_highly_selective_college_sat_score_model)
+exp(cbind(coef(applied_to_highly_selective_college_sat_score_model)))
+```
+
+
+## Grades Are Very Important vs. Math-Reading Standardized Test Score Differences
+
+Math-Reading difference is *not* significant.
+
+```{r}
+summary(grades_very_important_standardized_test_score_model)
+exp(cbind(coef(grades_very_important_standardized_test_score_model)))
+```
+
+
+## Grades Are Very Important  vs. Math-Verbal SAT Score Differences
+
+Math-Verbal difference is *not* significant.
+
+```{r}
+summary(grades_very_important_sat_score_model)
+exp(cbind(coef(grades_very_important_sat_score_model)))
+```
