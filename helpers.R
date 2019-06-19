@@ -1,4 +1,10 @@
-############################################################################################################################################################
+##############################################################################
+# R Helpers
+##############################################################################
+
+'%!in%' <- function(x,y)!('%in%' (x,y))
+
+##############################################################################
 # ELS02 provides data with the following missing codes:
 #
 #   -1: "Don't know" represents respondents who indicated that they didn't
@@ -48,8 +54,7 @@ is_missing <- function(x) {
 }
 
 replace_missing <- function(.data) {
-  return(
-    .data %>%
+  data <-  .data %>%
       na_if(-1) %>%
       na_if(-2) %>%
       na_if(-3) %>%
@@ -58,8 +63,25 @@ replace_missing <- function(.data) {
       na_if(-6) %>%
       na_if(-7) %>%
       na_if(-8) %>%
-      na_if(-9)
-  )
+      na_if(-9) %>%
+      na_if("Don't know") %>%
+      na_if("Refused") %>%
+      na_if("Item legitimate skip/NA") %>%
+      na_if("Nonrespondent") %>%
+      na_if("Out of range") %>%
+      na_if("Multiple response") %>%
+      na_if("Partial interview-breakoff") %>%
+      na_if("Survey component legitimate skip/NA") %>%
+      na_if("Missing")
+  
+  
+  if(is.factor(data)) {
+    return(
+      data %>% droplevels
+    )
+  }
+  
+  return(data)
 }
 
 
@@ -206,6 +228,54 @@ get_highest_sat_score_with_act_conversions <- function(sat, act) {
   )
 }
 
+
 ##############################################################################
-# Split a differenc
+# Check whether applied/accepted/attended Barron's selectivity as or
+# more competitive than value provided
+#
+# 1 = Most competitive
+# 6 = Noncompetitive
 ##############################################################################
+
+applied_barrons_level_or_more_competitive <- function(student_id, comp_level) {
+  college_records <- student_colleges_f2 %>%
+    filter(
+      !is.na(barrons04_competitiveness_index),
+      stu_id == student_id,
+      applied == "Yes",
+      barrons04_competitiveness_index <= comp_level
+    )
+  
+  return(
+    ifelse(nrow(college_records) >= 1, 1, 0)
+  )
+}
+
+accepted_barrons_level_or_more_competitive <- function(student_id, comp_level) {
+  college_records <- student_colleges_f2 %>%
+    filter(
+      !is.na(barrons04_competitiveness_index),
+      stu_id == student_id,
+      accepted == "Yes",
+      barrons04_competitiveness_index <= comp_level
+    )
+  
+  return(
+    ifelse(nrow(college_records) >= 1, 1, 0)
+  )
+}
+
+attended_barrons_level_or_more_competitive <- function(student_id, first_real_college, comp_level) {
+  college_records <- student_colleges_f2 %>%
+    filter(
+      !is.na(barrons04_competitiveness_index),
+      stu_id == student_id,
+      order == first_real_college,
+      attended == "Yes",
+      barrons04_competitiveness_index <= comp_level
+    )
+  
+  return(
+    ifelse(nrow(college_records) >= 1, 1, 0)
+  )
+}

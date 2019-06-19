@@ -7,3 +7,5 @@
 *.pdf
 *.docx
 *.tex
+*.xl*
+*.csv
