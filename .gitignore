@@ -1,3 +1,4 @@
+.RData
 .Rhistory
 .Rproj.user
 .env
@@ -5,7 +6,10 @@
 *.dta
 *.html
 *.pdf
+*.doc
 *.docx
 *.tex
 *.xl*
 *.csv
+*_files
+*_cache

@@ -3,20 +3,20 @@
 ##############################################################################
 
 # ELS02 - Restricted
-raw_els02_by_f3_pets <- readRDS("data/els02_r/els02_by_f3_pets.rds") %>% as_tibble
-raw_els02_f2_student_institution <- readRDS("data/els02_r/els02_f2_student_institution.rds") %>% as_tibble
-raw_els02_f3_student_institution <- readRDS("data/els02_r/els02_f3_student_institution.rds") %>% as_tibble
-raw_els02_high_school <- readRDS("data/els02_r/els02_high_school.rds") %>% as_tibble
+raw_els02_by_f3_pets <- readRDS("data/els02_r/els02_by_f3_pets.rds") %>% as_tibble()
+raw_els02_f2_student_institution <- readRDS("data/els02_r/els02_f2_student_institution.rds") %>% as_tibble()
+raw_els02_f3_student_institution <- readRDS("data/els02_r/els02_f3_student_institution.rds") %>% as_tibble()
+raw_els02_high_school <- readRDS("data/els02_r/els02_high_school.rds") %>% as_tibble()
 
 # Barron's Competitiveness Indices - Restricted
 raw_barrons04 <- read_excel(
   "data/barrons/NCES-BARRONS ADMISSIONS COMPETITIVE INDEX_July-2015_NCES 2016-333.xls",
   sheet = "NCES-Barrons 2004"
-) %>% as_tibble
+) %>% as_tibble()
 
 # IPEDS Data
-raw_ipeds04_institutional_characteristics <- read.csv("data/ipeds/hd2004.csv") %>% as_tibble
-raw_ipeds04_test_scores <- read.csv("data/ipeds/ic2004.csv") %>% as_tibble
+raw_ipeds04_institutional_characteristics <- read.csv("data/ipeds/hd2004.csv") %>% as_tibble()
+raw_ipeds04_test_scores <- read.csv("data/ipeds/ic2004.csv") %>% as_tibble()
 
 
 ##############################################################################
@@ -81,34 +81,34 @@ colleges$sector <- raw_ipeds04_institutional_characteristics$sector %>%
     "8" = "private not-for-profit, < 2-year",
     "9" = "private for-profit, < 2-year",
     "99" = "sector unknown (not active)"
-  ) 
+  )
 
 
 colleges$level <- raw_ipeds04_institutional_characteristics$iclevel %>%
-  replace_missing() %>% 
+  replace_missing() %>%
   recode(
-    "1"= "four or more years",
+    "1" = "four or more years",
     "2" = "at least 2 but less than 4 years",
-    "3"= "less than 2 years (below associate)",
+    "3" = "less than 2 years (below associate)",
   )
 
 
 colleges$ugoffer <- raw_ipeds04_institutional_characteristics$ugoffer %>%
-  replace_missing() %>% 
+  replace_missing() %>%
   recode(
     "1" = "undergraduate degree or certificate offering",
     "2" = "no undergraduate offering",
   )
 
 colleges$degree_offering <- raw_ipeds04_institutional_characteristics$deggrant %>%
-  replace_missing() %>% 
+  replace_missing() %>%
   recode(
-    "1"= "degree-granting",
+    "1" = "degree-granting",
     "2" = "nondegree-granting, primarily postsecondary",
   )
 
 colleges$locale <- raw_ipeds04_institutional_characteristics$locale %>%
-  replace_missing() %>% 
+  replace_missing() %>%
   recode(
     "1" = "large city",
     "2" = "mid-size city",
@@ -147,7 +147,8 @@ colleges <- colleges %>%
       sat_math_75 = satmt75,
     ),
     by = c("unitid" = "unitid"),
-  ) %>% replace_missing()
+  ) %>%
+  replace_missing()
 
 colleges$open_admissions <- colleges$open_admissions %>%
   recode(
@@ -168,12 +169,12 @@ colleges <- colleges %>%
 student_colleges_f2 <- student_colleges_f2 %>%
   left_join(
     select(raw_barrons04,
-           MERGEID_04,
-           barrons04_competitiveness_index = BARRONS04,
-           barrons04_competitiveness_index_plus = BARRONS04P
+      MERGEID_04,
+      barrons04_competitiveness_index = BARRONS04,
+      barrons04_competitiveness_index_plus = BARRONS04P
     ),
     by = c("unitid" = "MERGEID_04"),
-  ) 
+  )
 
 student_colleges_f2$carnegie_selectivity <- raw_els02_f2_student_institution$F2ISELC %>%
   replace_missing()
@@ -238,25 +239,25 @@ students$urbanicity <- raw_els02_by_f3_pets$BYURBAN %>%
 
 # This variable uses the revised version of F2NAPPLY. From codebook:
 
-students$ever_applied_to_college = raw_els02_by_f3_pets$F2NAPP2P %>%
+students$ever_applied_to_college <- raw_els02_by_f3_pets$F2NAPP2P %>%
   replace_missing() %>%
   recode(
     "0 - did not apply" = 0,
-   .default = 1 
+    .default = 1
   )
 
 students$first_real_college_link <- raw_els02_by_f3_pets$F2PS1 %>%
   replace_missing() %>%
-  as.character
+  as.character()
 
 students$attendeded_first_college_four_year_full_time <- ifelse(
   raw_els02_by_f3_pets$F2PS1LVL == "Four or more years" & raw_els02_by_f3_pets$F2PS1FTP == "Full-time or mainly full-time",
-    1,
-    0
-  ) %>%
+  1,
+  0
+) %>%
   replace_missing()
 
-students$time_to_degree_months <- raw_els02_by_f3_pets$F3PS2BA %>% 
+students$time_to_degree_months <- raw_els02_by_f3_pets$F3PS2BA %>%
   replace_missing()
 
 students$parents_expect_college_for_children <- raw_els02_by_f3_pets$BYSTEXP %>%
@@ -304,10 +305,10 @@ students$ba_status <- raw_els02_by_f3_pets$F3ATTAINMENT %>%
   replace_missing() %>%
   recode(
     "No HS credential, no PS attendance" = "Did not try for four-year college",
-    "HS credential, no PS attendance" =  "Did not try for four-year college",
+    "HS credential, no PS attendance" = "Did not try for four-year college",
     "Some PS attendance, no PS credential" = "Did not try for four-year college",
     "Undergraduate certificate" = "Did not try for four-year college",
-    "Associates degree" =  "Did not try for four-year college",
+    "Associates degree" = "Did not try for four-year college",
     "Bachelors degree" = "Earned",
     "Post-Baccalaureate certificate" = "Earned",
     "Masters degree" = "Earned",
@@ -318,7 +319,7 @@ students$ba_status <- raw_els02_by_f3_pets$F3ATTAINMENT %>%
 
 students$ba_status <- fct_expand(students$ba_status, "Tried for BA but did not earn")
 
-students$ba_status[students$attempted_ba ==1 & students$earned_ba == 0] = "Tried for BA but did not earn"
+students$ba_status[students$attempted_ba == 1 & students$earned_ba == 0] <- "Tried for BA but did not earn"
 
 
 students$grades_very_important <- raw_els02_by_f3_pets$BYS37 %>%
@@ -446,21 +447,21 @@ students$sat_score_math_reading_difference_categorical <- cut(students$sat_score
 
 # Specific combinations of M-V
 students$standardized_test_score_m90_r90 <- ifelse(
-  students$standardized_test_score_math_percent_rank >= 87.5 & students$standardized_test_score_math_percent_rank <= 92.5 & 
+  students$standardized_test_score_math_percent_rank >= 87.5 & students$standardized_test_score_math_percent_rank <= 92.5 &
     students$standardized_test_score_reading_percent_rank >= 87.5 & students$standardized_test_score_reading_percent_rank <= 92.5,
   1,
   0
 )
 
 students$standardized_test_score_m90_r60 <- ifelse(
-  students$standardized_test_score_math_percent_rank >= 87.5 & students$standardized_test_score_math_percent_rank <= 92.5 & 
+  students$standardized_test_score_math_percent_rank >= 87.5 & students$standardized_test_score_math_percent_rank <= 92.5 &
     students$standardized_test_score_reading_percent_rank >= 57.5 & students$standardized_test_score_reading_percent_rank <= 62.5,
   1,
   0
 )
 
 students$standardized_test_score_m75_r75 <- ifelse(
-  students$standardized_test_score_math_percent_rank >= 72.5 & students$standardized_test_score_math_percent_rank <= 77.5 & 
+  students$standardized_test_score_math_percent_rank >= 72.5 & students$standardized_test_score_math_percent_rank <= 77.5 &
     students$standardized_test_score_reading_percent_rank >= 72.5 & students$standardized_test_score_reading_percent_rank <= 77.5,
   1,
   0
@@ -468,28 +469,28 @@ students$standardized_test_score_m75_r75 <- ifelse(
 
 students$standardized_test_score_m60_r90 <- ifelse(
   students$standardized_test_score_math_percent_rank >= 57.5 & students$standardized_test_score_math_percent_rank <= 62.5,
-  students$standardized_test_score_reading_percent_rank >= 87.5 & students$standardized_test_score_reading_percent_rank <= 92.5 & 
+  students$standardized_test_score_reading_percent_rank >= 87.5 & students$standardized_test_score_reading_percent_rank <= 92.5 &
     1,
   0
 )
 
 
 students$standardized_test_score_m50_r50 <- ifelse(
-  students$standardized_test_score_math_percent_rank >= 47.5 & students$standardized_test_score_math_percent_rank <= 52.5 & 
+  students$standardized_test_score_math_percent_rank >= 47.5 & students$standardized_test_score_math_percent_rank <= 52.5 &
     students$standardized_test_score_reading_percent_rank >= 47.5 & students$standardized_test_score_reading_percent_rank <= 52.5,
   1,
   0
 )
 
 students$standardized_test_score_m50_r20 <- ifelse(
-  students$standardized_test_score_math_percent_rank >= 47.5 & students$standardized_test_score_math_percent_rank <= 52.5 & 
+  students$standardized_test_score_math_percent_rank >= 47.5 & students$standardized_test_score_math_percent_rank <= 52.5 &
     students$standardized_test_score_reading_percent_rank >= 17.5 & students$standardized_test_score_reading_percent_rank <= 22.5,
   1,
   0
 )
 
 students$standardized_test_score_m35_r35 <- ifelse(
-  students$standardized_test_score_math_percent_rank >= 32.5 & students$standardized_test_score_math_percent_rank <= 37.5 & 
+  students$standardized_test_score_math_percent_rank >= 32.5 & students$standardized_test_score_math_percent_rank <= 37.5 &
     students$standardized_test_score_reading_percent_rank >= 32.5 & students$standardized_test_score_reading_percent_rank <= 37.5,
   1,
   0
@@ -497,9 +498,9 @@ students$standardized_test_score_m35_r35 <- ifelse(
 
 students$standardized_test_score_m20_r50 <- ifelse(
   students$standardized_test_score_math_percent_rank >= 17.5 & students$standardized_test_score_math_percent_rank <= 22.5,
-  students$standardized_test_score_reading_percent_rank >= 47.5 & students$standardized_test_score_reading_percent_rank <= 52.5 & 
+  students$standardized_test_score_reading_percent_rank >= 47.5 & students$standardized_test_score_reading_percent_rank <= 52.5 &
     1,
   0
 )
 
-write.csv(students, file='data/students.csv', na="")
+write.csv(students, file = "data/students.csv", na = "")
