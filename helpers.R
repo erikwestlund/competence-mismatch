@@ -237,7 +237,7 @@ get_highest_sat_score_with_act_conversions <- function(sat, act) {
 # 6 = Noncompetitive
 ##############################################################################
 
-applied_barrons_level_or_more_competitive <- function(student_id, comp_level) {
+application_count_to_barrons_level_or_more_competitive <- function(student_id, comp_level) {
   college_records <- student_colleges_f2 %>%
     filter(
       !is.na(barrons04_competitiveness_index),
@@ -247,11 +247,11 @@ applied_barrons_level_or_more_competitive <- function(student_id, comp_level) {
     )
   
   return(
-    ifelse(nrow(college_records) >= 1, 1, 0)
+    nrow(college_records)
   )
 }
 
-accepted_barrons_level_or_more_competitive <- function(student_id, comp_level) {
+acceptance_count_to_barrons_level_or_more_competitive <- function(student_id, comp_level) {
   college_records <- student_colleges_f2 %>%
     filter(
       !is.na(barrons04_competitiveness_index),
@@ -261,7 +261,7 @@ accepted_barrons_level_or_more_competitive <- function(student_id, comp_level) {
     )
   
   return(
-    ifelse(nrow(college_records) >= 1, 1, 0)
+    nrow(college_records)
   )
 }
 
@@ -278,4 +278,22 @@ attended_barrons_level_or_more_competitive <- function(student_id, first_real_co
   return(
     ifelse(nrow(college_records) >= 1, 1, 0)
   )
+}
+
+##############################################################################
+# Get Math/Reading composite at provided percent ranks. Useful
+# For estimating marginal effects
+##############################################################################
+
+get_math_reading_composite_at_percent_ranks <- function(m_percent, r_percent) {
+  m_l_bound <- m_percent - 1
+  m_r_bound <- m_percent + 1
+  r_l_bound <- r_percent - 1
+  r_r_bound <- r_percent + 1
+  
+  m <- summary(students$standardized_test_score_math[students$standardized_test_score_math_percent_rank >= m_l_bound & students$standardized_test_score_math_percent_rank<=m_r_bound])["Mean"][[1]]
+  r <- summary(students$standardized_test_score_reading[students$standardized_test_score_reading_percent_rank >= r_l_bound & students$standardized_test_score_reading_percent_rank<=r_r_bound])["Mean"][[1]]
+  c <- m+r
+  
+  return(c)
 }

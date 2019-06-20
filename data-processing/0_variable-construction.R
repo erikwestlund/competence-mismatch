@@ -206,6 +206,7 @@ student_colleges_f2$attended <- raw_els02_f2_student_institution$F2IATTND %>%
 ##############################################################################
 # Student Demographics
 ##############################################################################
+
 students$female <- raw_els02_by_f3_pets$BYSEX %>%
   recode("Male" = 0, "Female" = 1) %>%
   replace_missing()
@@ -235,16 +236,24 @@ students$urbanicity <- raw_els02_by_f3_pets$BYURBAN %>%
 # Educational Expectations & Outcomes
 ##############################################################################
 
-students$first_real_college_link <- raw_els02_by_f3_pets %>% 
-  filter(
-    STU_ID == student_id
-  ) %>%
-  select(F2PS1) %>%
-  first %>%
+# This variable uses the revised version of F2NAPPLY. From codebook:
+
+students$ever_applied_to_college = raw_els02_by_f3_pets$F2NAPP2P %>%
+  replace_missing() %>%
+  recode(
+    "0 - did not apply" = 0,
+   .default = 1 
+  )
+
+students$first_real_college_link <- raw_els02_by_f3_pets$F2PS1 %>%
+  replace_missing() %>%
   as.character
 
-students$attendeded_first_college_four_year_full_time <- raw_els02_by_f3_pets$F2PS1LVL == "Four or more years" & 
-  raw_els02_by_f3_pets$F2PS1FTP == "Full-time or mainly full-time" %>%
+students$attendeded_first_college_four_year_full_time <- ifelse(
+  raw_els02_by_f3_pets$F2PS1LVL == "Four or more years" & raw_els02_by_f3_pets$F2PS1FTP == "Full-time or mainly full-time",
+    1,
+    0
+  ) %>%
   replace_missing()
 
 students$time_to_degree_months <- raw_els02_by_f3_pets$F3PS2BA %>% 
@@ -276,6 +285,12 @@ students$earned_ba <- raw_els02_by_f3_pets$F3ATTAINMENT %>%
     "Post-Masters certificate" = 1,
     "Doctoral degree" = 1
   )
+
+students$earned_ba_within_six_years <- ifelse(
+  students$earned_ba & students$time_to_degree_months <= 72,
+  1,
+  0
+)
 
 students$attempted_ba <- raw_els02_by_f3_pets$F2EDLEVL %>%
   replace_missing() %>%
@@ -326,17 +341,29 @@ students$applied_to_highly_selective_college_carnegie <- raw_els02_by_f3_pets$F2
     "Selectivity not classified,less than 2yr" = 0
   )
 
-students$applied_to_barrons_very_competitive_plus <- mapply(
-  applied_barrons_level_or_more_competitive,
+students$application_count_to_barrons_very_competitive_plus <- mapply(
+  application_count_to_barrons_level_or_more_competitive,
   students$stu_id,
   2
 )
 
-students$accepted_to_barrons_very_competitive_plus <- mapply(
-  accepted_barrons_level_or_more_competitive,
+students$applied_to_barrons_very_competitive_plus <- students$application_count_to_barrons_very_competitive_plus %>%
+  recode(
+    `0` = 0,
+    .default = 1
+  )
+
+students$acceptance_count_to_barrons_very_competitive_plus <- mapply(
+  acceptance_count_to_barrons_level_or_more_competitive,
   students$stu_id,
   2
 )
+
+students$accepted_to_barrons_very_competitive_plus <- students$acceptance_count_to_barrons_very_competitive_plus %>%
+  recode(
+    `0` = 0,
+    .default = 1
+  )
 
 students$attended_barrons_very_competitive_plus_first_real_college <- mapply(
   attended_barrons_level_or_more_competitive,
@@ -415,3 +442,64 @@ students$sat_score_math_reading_difference_categorical <- cut(students$sat_score
   breaks = c(-Inf, -25, -10, -5, 5, 10, 25, Inf),
   labels = c("verbal+ 25", "verbal+ 11-24", "verbal+ 6-1", "math/verbal+/-5", "math+ 6-10", "math+ 11-24", "math+ 25")
 )
+
+
+# Specific combinations of M-V
+students$standardized_test_score_m90_r90 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 87.5 & students$standardized_test_score_math_percent_rank <= 92.5 & 
+    students$standardized_test_score_reading_percent_rank >= 87.5 & students$standardized_test_score_reading_percent_rank <= 92.5,
+  1,
+  0
+)
+
+students$standardized_test_score_m90_r60 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 87.5 & students$standardized_test_score_math_percent_rank <= 92.5 & 
+    students$standardized_test_score_reading_percent_rank >= 57.5 & students$standardized_test_score_reading_percent_rank <= 62.5,
+  1,
+  0
+)
+
+students$standardized_test_score_m75_r75 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 72.5 & students$standardized_test_score_math_percent_rank <= 77.5 & 
+    students$standardized_test_score_reading_percent_rank >= 72.5 & students$standardized_test_score_reading_percent_rank <= 77.5,
+  1,
+  0
+)
+
+students$standardized_test_score_m60_r90 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 57.5 & students$standardized_test_score_math_percent_rank <= 62.5,
+  students$standardized_test_score_reading_percent_rank >= 87.5 & students$standardized_test_score_reading_percent_rank <= 92.5 & 
+    1,
+  0
+)
+
+
+students$standardized_test_score_m50_r50 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 47.5 & students$standardized_test_score_math_percent_rank <= 52.5 & 
+    students$standardized_test_score_reading_percent_rank >= 47.5 & students$standardized_test_score_reading_percent_rank <= 52.5,
+  1,
+  0
+)
+
+students$standardized_test_score_m50_r20 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 47.5 & students$standardized_test_score_math_percent_rank <= 52.5 & 
+    students$standardized_test_score_reading_percent_rank >= 17.5 & students$standardized_test_score_reading_percent_rank <= 22.5,
+  1,
+  0
+)
+
+students$standardized_test_score_m35_r35 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 32.5 & students$standardized_test_score_math_percent_rank <= 37.5 & 
+    students$standardized_test_score_reading_percent_rank >= 32.5 & students$standardized_test_score_reading_percent_rank <= 37.5,
+  1,
+  0
+)
+
+students$standardized_test_score_m20_r50 <- ifelse(
+  students$standardized_test_score_math_percent_rank >= 17.5 & students$standardized_test_score_math_percent_rank <= 22.5,
+  students$standardized_test_score_reading_percent_rank >= 47.5 & students$standardized_test_score_reading_percent_rank <= 52.5 & 
+    1,
+  0
+)
+
+write.csv(students, file='data/students.csv', na="")
