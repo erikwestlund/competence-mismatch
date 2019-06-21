@@ -45,6 +45,13 @@ students <- tibble(
   byexpwt = raw_els02_by_f3_pets$BYEXPWT,
 ) %>% replace_missing()
 
+# High school file
+high_schools <- tibble(
+  sch_id = raw_els02_high_school$SCH_ID,
+  strat_id = raw_els02_high_school$STRAT_ID,
+  psu = raw_els02_high_school$PSU,
+) %>% replace_missing()
+
 # College data file using IPEDS institutional characteristics file from 2004
 colleges <- tibble(
   unitid = raw_ipeds04_institutional_characteristics$unitid,
@@ -91,7 +98,6 @@ colleges$level <- raw_ipeds04_institutional_characteristics$iclevel %>%
     "2" = "at least 2 but less than 4 years",
     "3" = "less than 2 years (below associate)",
   )
-
 
 colleges$ugoffer <- raw_ipeds04_institutional_characteristics$ugoffer %>%
   replace_missing() %>%
@@ -205,6 +211,45 @@ student_colleges_f2$attended <- raw_els02_f2_student_institution$F2IATTND %>%
 
 
 ##############################################################################
+# Student High School Characteristics
+##############################################################################
+
+high_schools$school_control <- raw_els02_high_school$BYSCTRL %>%
+  replace_missing()
+
+
+high_schools$school_percent_10th_grade_free_reduced_lunch <- raw_els02_high_school$BYA21 %>%
+  replace_missing()
+
+high_schools$school_percent_student_body_in_ap <- raw_els02_high_school$F1A22F %>%
+  replace_missing()
+
+# recode to approximate percentage
+high_schools$school_percent_attend_four_year_college_2003 <- raw_els02_high_school$F1A19A %>%
+  replace_missing()
+
+# recode to approximate percentage
+high_schools$school_percent_10th_grade_remedial_math <- raw_els02_high_school$BYA14J %>%
+  replace_missing()
+
+
+students <- students %>%
+  left_join(
+    select(high_schools,
+           sch_id,
+           school_control,
+           school_percent_10th_grade_free_reduced_lunch,
+           school_percent_student_body_in_ap,
+           school_percent_attend_four_year_college_2003,
+           school_percent_10th_grade_remedial_math
+    ),
+    by = "sch_id",
+  )
+
+
+
+
+########################################################################
 # Student Demographics
 ##############################################################################
 
@@ -320,7 +365,6 @@ students$ba_status <- raw_els02_by_f3_pets$F3ATTAINMENT %>%
 students$ba_status <- fct_expand(students$ba_status, "Tried for BA but did not earn")
 
 students$ba_status[students$attempted_ba == 1 & students$earned_ba == 0] <- "Tried for BA but did not earn"
-
 
 students$grades_very_important <- raw_els02_by_f3_pets$BYS37 %>%
   replace_missing() %>%
