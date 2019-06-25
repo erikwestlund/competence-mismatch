@@ -72,7 +72,8 @@ replace_missing <- function(.data) {
       na_if("Multiple response") %>%
       na_if("Partial interview-breakoff") %>%
       na_if("Survey component legitimate skip/NA") %>%
-      na_if("Missing")
+      na_if("Missing") %>%
+      na_if("Not administered; abbreviated interview or breakoff")
   
   
   if(is.factor(data)) {
@@ -82,6 +83,101 @@ replace_missing <- function(.data) {
   }
   
   return(data)
+}
+
+
+##############################################################################
+# Generate random income between provided boundaries
+##############################################################################
+
+convert_income_to_number_with_random_amount_in_boundary <- function(x){
+  if(is.na(x)) {
+    return(NA)
+  } else if(x == "None") {
+    return(0)
+  } else if(x == "$1,000 or less") {
+    return(sample(1:1000, 1))
+  } else if(x == "$1,001-$5,000") {
+    return(sample(1001:5000, 1))
+  } else if(x == "$5,001-$10,000") {
+    return(sample(5001:10000, 1))
+  } else if(x == "$10,001-$15,000") {
+    return(sample(10001:15000, 1))
+  } else if(x == "$15,001-$20,000") {
+    return(sample(15001:20000, 1))
+  } else if(x == "$20,001-$25,000") {
+    return(sample(20001:25000, 1))
+  } else if(x == "$25,001-$35,000") {
+    return(sample(25001:35000, 1))
+  } else if(x == "$35,001-$50,000") {
+    return(sample(35001:50000, 1))
+  } else if(x == "$50,001-$75,000") {
+    return(sample(50001:75000, 1))
+  } else if(x == "$75,001-$100,000") {
+    return(sample(75001:100000, 1))
+  } else if(x == "$100,001-$200,000") {
+    return(sample(100001:200000, 1))
+  } else if(x == "$200,001 or more") {
+    return(200001)
+  }
+}
+
+##############################################################################
+# Generate percent categorical of extra-curricular hours to
+# an integer within the provided boundaries
+##############################################################################
+
+convert_percent_categorical_extracurricular_hours_to_integer <- function(x){
+  if(is.na(x)) {
+    return(NA)
+  } 
+  else if(x == "None") {
+    return(0)
+  }
+  else if(x == "Less than 1 hour/week") {
+    return(sample(0:1, 1))
+  }
+  else if(x == "1-4 hours") {
+    return(sample(1:4, 1))
+  }
+  else if(x == "5-9 hours") {
+    return(sample(5:9, 1))
+  }
+  else if(x == "10-14 hours") {
+    return(sample(10:14, 1))
+  }
+  else if(x == "15-19 hours") {
+    return(sample(15:19, 1))
+  }
+  else if(x == "20-24 hours") {
+    return(sample(20:24, 1))
+  }
+  else if(x == "25 or more hours/week") {
+    return(25)
+  }
+}
+
+##############################################################################
+# Generate percent categorical in high school survey data to
+# an integer within the provided boundaries
+##############################################################################
+
+convert_percent_categorical_in_high_school_survey_data_to_random_percent_within_boundaries <- function(x){
+  if(is.na(x)) {
+    return(NA)
+  } else if(x == "None") {
+    return(0)
+  } else if(x == "1-10 percent") {
+    return(sample(1:10, 1))
+  } else if(x == "11-24 percent") {
+    return(sample(11:24, 1))
+  } else if(x == "25-49 percent") {
+    return(sample(25:49, 1))
+  } else if(x == "50-74 percent") {
+    return(sample(50:74, 1))
+  } else if(x == "75-100 percent") {
+    return(sample(75:100, 1))
+  }
 }
 
 

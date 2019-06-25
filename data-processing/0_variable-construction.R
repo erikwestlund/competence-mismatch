@@ -90,7 +90,6 @@ colleges$sector <- raw_ipeds04_institutional_characteristics$sector %>%
     "99" = "sector unknown (not active)"
   )
 
-
 colleges$level <- raw_ipeds04_institutional_characteristics$iclevel %>%
   replace_missing() %>%
   recode(
@@ -167,7 +166,6 @@ colleges <- colleges %>%
     admit_rate = (admit_men + admit_women) / (applied_men + applied_women)
   )
 
-
 ##############################################################################
 # Prepare Student-College File
 ##############################################################################
@@ -214,37 +212,91 @@ student_colleges_f2$attended <- raw_els02_f2_student_institution$F2IATTND %>%
 # Student High School Characteristics
 ##############################################################################
 
+high_schools$geographic_region <- raw_els02_high_school$BYREGION %>%
+  replace_missing() %>%
+  recode(
+    "Northeast" = "northeast",
+    "Midwest" = "midwest", 
+    "South" = "south",
+    "West" = "west"
+  ) %>%
+  fct_relevel("northeast")
+
+high_schools$urbanicity <- raw_els02_high_school$BYURBAN %>%
+  replace_missing() %>%
+  recode(
+    "Suburban" = "suburban",
+    "Urban" = "urban",
+    "Rural" = "rural"
+  ) %>%
+  fct_relevel("suburban")
+
+
 high_schools$school_control <- raw_els02_high_school$BYSCTRL %>%
   replace_missing()
 
-
+# Percentages not needing recoding
 high_schools$school_percent_10th_grade_free_reduced_lunch <- raw_els02_high_school$BYA21 %>%
   replace_missing()
 
 high_schools$school_percent_student_body_in_ap <- raw_els02_high_school$F1A22F %>%
   replace_missing()
 
-# recode to approximate percentage
-high_schools$school_percent_attend_four_year_college_2003 <- raw_els02_high_school$F1A19A %>%
-  replace_missing()
-
-# recode to approximate percentage
 high_schools$school_percent_10th_grade_remedial_math <- raw_els02_high_school$BYA14J %>%
   replace_missing()
 
+high_schools$school_percent_10th_grade_college_prep_program <- raw_els02_high_school$BYA14B %>%
+  replace_missing()
 
-students <- students %>%
-  left_join(
-    select(high_schools,
-           sch_id,
-           school_control,
-           school_percent_10th_grade_free_reduced_lunch,
-           school_percent_student_body_in_ap,
-           school_percent_attend_four_year_college_2003,
-           school_percent_10th_grade_remedial_math
-    ),
-    by = "sch_id",
-  )
+
+# Percentages in surveys with categorical response. Convert to random number within boundaries.
+high_schools$school_percent_attend_four_year_college_2003_categorical <- raw_els02_high_school$F1A19A %>%
+  replace_missing()
+
+high_schools$school_percent_attend_four_year_college_2003_integer <- mapply(
+  convert_percent_categorical_in_high_school_survey_data_to_random_percent_within_boundaries,
+  high_schools$school_percent_attend_four_year_college_2003_categorical
+)
+
+high_schools$school_percent_attend_two_year_college_2003_categorical <- raw_els02_high_school$F1A19B %>%
+  replace_missing()
+
+high_schools$school_percent_attend_two_year_college_2003_integer <- mapply(
+  convert_percent_categorical_in_high_school_survey_data_to_random_percent_within_boundaries,
+  high_schools$school_percent_attend_two_year_college_2003_categorical
+)
+
+high_schools$school_percent_attend_college_app_program_categorical <- raw_els02_high_school$F1A20A %>%
+  replace_missing()
+
+high_schools$school_percent_attend_college_app_program_integer <- mapply(
+  convert_percent_categorical_in_high_school_survey_data_to_random_percent_within_boundaries,
+  high_schools$school_percent_attend_college_app_program_categorical
+)
+
+high_schools$school_percent_attend_financial_aid_program_categorical <- raw_els02_high_school$F1A20B %>%
+  replace_missing()
+
+high_schools$school_percent_attend_financial_aid_program_integer <- mapply(
+  convert_percent_categorical_in_high_school_survey_data_to_random_percent_within_boundaries,
+  high_schools$school_percent_attend_financial_aid_program_categorical
+)
+
+high_schools$school_percent_attend_sat_course_categorical <- raw_els02_high_school$F1A20C %>%
+  replace_missing()
+
+high_schools$school_percent_attend_sat_course_integer <- mapply(
+  convert_percent_categorical_in_high_school_survey_data_to_random_percent_within_boundaries,
+  high_schools$school_percent_attend_sat_course_categorical
+)
+
+high_schools$school_percent_attend_college_fair_categorical <- raw_els02_high_school$F1A20C %>%
+  replace_missing()
+
+high_schools$school_percent_attend_college_fair_integer <- mapply(
+  convert_percent_categorical_in_high_school_survey_data_to_random_percent_within_boundaries,
+  high_schools$school_percent_attend_college_fair_categorical
+)
 
 
 
@@ -253,11 +305,45 @@ students <- students %>%
 # Student Demographics
 ##############################################################################
 
+students$geographic_region <- raw_els02_by_f3_pets$BYREGION %>%
+  replace_missing() %>%
+  recode(
+    "Northeast" = "northeast",
+    "Midwest" = "midwest", 
+    "South" = "south",
+    "West" = "west"
+  ) %>%
+  fct_relevel("northeast")
+
+
 students$female <- raw_els02_by_f3_pets$BYSEX %>%
-  recode("Male" = 0, "Female" = 1) %>%
-  replace_missing()
+  recode(
+    "Male" = "male",
+    "Female" = "female"
+    ) %>%
+  replace_missing()%>%
+  fct_relevel("female")
 
 students$ses <- raw_els02_by_f3_pets$BYSES1 %>% replace_missing()
+
+students$parents_highest_level_of_education <- raw_els02_by_f3_pets$BYPARED %>%
+  replace_missing() %>%
+  recode(
+    "Graduated from 2-year school" = "two-year degree",
+    "Graduated from college" = "four-year degree",
+    "Completed Master's degree or equivalent" = "advanced degree",
+    "Completed PhD, MD, other advanced degree" = "advanced degree",
+   .default = "no four-year degree"
+  ) %>%
+  fct_relevel("no four-year degree")
+
+students$family_income_1000 <- mapply(
+  convert_income_to_number_with_random_amount_in_boundary,
+  raw_els02_by_f3_pets$BYINCOME %>% replace_missing() 
+)/1000
+
+students$family_income_log <- log(students$family_income_1000 + 0.001)
+
 students$race <- raw_els02_by_f3_pets$BYRACE %>%
   replace_missing() %>%
   recode(
@@ -268,7 +354,18 @@ students$race <- raw_els02_by_f3_pets$BYRACE %>%
     "Hispanic, race specified" = "hispanic",
     "More than one race, non-Hispanic" = "multiracial",
     "White, non-Hispanic" = "white, non-hispanic"
-  )
+  ) %>%
+  fct_relevel("white, non-hispanic")
+
+
+students$generational_status = raw_els02_by_f3_pets$BYGNSTAT %>%
+  replace_missing() %>%
+  recode(
+    "SM and mother both born in US" = "born in us to us mother",
+    "SM born in US; mother born in PR/non-US" = "born in us to mother born outside us",
+    "SM born in Puerto Rico or non-US country" = "born outside us",
+  ) %>%
+  fct_relevel("born in us to us mother")
 
 students$urbanicity <- raw_els02_by_f3_pets$BYURBAN %>%
   replace_missing() %>%
@@ -276,14 +373,32 @@ students$urbanicity <- raw_els02_by_f3_pets$BYURBAN %>%
     "Suburban" = "suburban",
     "Urban" = "urban",
     "Rural" = "rural"
-  )
+  ) %>%
+  fct_relevel("suburban")
 
 ##############################################################################
 # Educational Expectations & Outcomes
 ##############################################################################
 
-# This variable uses the revised version of F2NAPPLY. From codebook:
 
+students$hs_gpa <- raw_els02_by_f3_pets$F1RGP %>%
+  replace_missing()
+
+students$self_efficacy_math <- raw_els02_by_f3_pets$BYMATHSE %>%
+  replace_missing()
+
+students$self_efficacy_english <- raw_els02_by_f3_pets$BYENGLSE %>%
+  replace_missing()
+
+students$ec_hours <- raw_els02_by_f3_pets$F1S27 %>%
+  replace_missing() 
+
+students$ec_hours_integer <- mapply(
+  convert_percent_categorical_extracurricular_hours_to_integer,
+  students$ec_hours
+)
+
+# This variable uses the revised version of F2NAPPLY.
 students$ever_applied_to_college <- raw_els02_by_f3_pets$F2NAPP2P %>%
   replace_missing() %>%
   recode(
@@ -315,7 +430,12 @@ students$parents_expect_college_for_children <- raw_els02_by_f3_pets$BYSTEXP %>%
     "Graduate from college" = 1,
     "Obtain Master's degree or equivalent" = 1,
     "Obtain PhD, MD, or other advanced degree" = 1
-  )
+  ) %>%
+  recode(
+    `0` = "no expectation of college",
+    `1` = "expects college"
+  ) %>% fct_relevel("expects college")
+
 
 students$earned_ba <- raw_els02_by_f3_pets$F3ATTAINMENT %>%
   replace_missing() %>%
@@ -361,9 +481,7 @@ students$ba_status <- raw_els02_by_f3_pets$F3ATTAINMENT %>%
     "Doctoral degree" = "Earned",
   )
 
-
 students$ba_status <- fct_expand(students$ba_status, "Tried for BA but did not earn")
-
 students$ba_status[students$attempted_ba == 1 & students$earned_ba == 0] <- "Tried for BA but did not earn"
 
 students$grades_very_important <- raw_els02_by_f3_pets$BYS37 %>%
@@ -426,6 +544,7 @@ students$transferred_colleges <- raw_els02_by_f3_pets$F2SWITCH %>%
 
 ##############################################################################
 # Test Scores
+# We will center these on average before grand-mean centering
 ##############################################################################
 
 # Standardized scores administered to ELS02 sample
@@ -465,7 +584,6 @@ students$sat_score_verbal_highest_vs_act_converted <- mapply(
 )
 
 students$sat_score_composite_highest_vs_act_converted <- students$sat_score_math_highest_vs_act_converted + students$sat_score_verbal_highest_vs_act_converted
-
 
 # Calculate percentile ranks of test scores
 students$standardized_test_score_math_percent_rank <- percent_rank(students$standardized_test_score_math) * 100
@@ -518,7 +636,6 @@ students$standardized_test_score_m60_r90 <- ifelse(
   0
 )
 
-
 students$standardized_test_score_m50_r50 <- ifelse(
   students$standardized_test_score_math_percent_rank >= 47.5 & students$standardized_test_score_math_percent_rank <= 52.5 &
     students$standardized_test_score_reading_percent_rank >= 47.5 & students$standardized_test_score_reading_percent_rank <= 52.5,
@@ -546,5 +663,3 @@ students$standardized_test_score_m20_r50 <- ifelse(
     1,
   0
 )
-
-write.csv(students, file = "data/students.csv", na = "")
