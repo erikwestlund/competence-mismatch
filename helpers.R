@@ -334,7 +334,12 @@ get_highest_sat_score_with_act_conversions <- function(sat, act) {
 ##############################################################################
 
 application_count_to_barrons_level_or_more_competitive <- function(student_id, comp_level) {
-  college_records <- student_colleges_f2 %>%
+  
+    if(is.na(students$ever_applied_to_college[students$stu_id == student_id])) {
+      return(NA)
+    }
+  
+    college_records <- student_colleges_f2 %>%
     filter(
       !is.na(barrons04_competitiveness_index),
       stu_id == student_id,
@@ -348,6 +353,11 @@ application_count_to_barrons_level_or_more_competitive <- function(student_id, c
 }
 
 acceptance_count_to_barrons_level_or_more_competitive <- function(student_id, comp_level) {
+  
+  if(is.na(students$ever_applied_to_college[students$stu_id == student_id])) {
+    return(NA)
+  }
+  
   college_records <- student_colleges_f2 %>%
     filter(
       !is.na(barrons04_competitiveness_index),
@@ -362,6 +372,11 @@ acceptance_count_to_barrons_level_or_more_competitive <- function(student_id, co
 }
 
 attended_barrons_level_or_more_competitive <- function(student_id, first_real_college, comp_level) {
+  
+  if(is.na(students$ever_applied_to_college[students$stu_id == student_id])) {
+    return(NA)
+  }
+  
   college_records <- student_colleges_f2 %>%
     filter(
       !is.na(barrons04_competitiveness_index),
@@ -374,6 +389,21 @@ attended_barrons_level_or_more_competitive <- function(student_id, first_real_co
   return(
     ifelse(nrow(college_records) >= 1, 1, 0)
   )
+}
+
+##############################################################################
+# Calculate a percent rank within an imputation.
+##############################################################################
+
+get_percent_rank_by_imputation <- function(variable, data) {
+  imps <- max(data$.imp)
+  
+  percent_rank(students[variable][students$.imp]) * 100
+  
+  mi_processed %>% 
+    group_by(.imp) %>%
+    mutate(rank = percent_rank(sat_score_math_highest_vs_act_converted))
+  
 }
 
 ##############################################################################
