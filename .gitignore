@@ -13,3 +13,7 @@
 *.csv
 *_files
 *_cache
+*.ster
+missing-report.txt
+graphics/*
+*.smcl

@@ -1,0 +1,114 @@
+---
+title: "Configuration of Talent and Students' Self-Selection into PSE Market"
+author: "Freda Lynn & Erik Westlund"
+date: "June 20, 2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+```{r setup, include=FALSE, echo=FALSE, cache=FALSE}
+options(width=200)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, tidy = TRUE, size = "small")
+```
+
+```{r bootstrap, include=FALSE, cache=TRUE}
+source("bootstrap.R")
+```
+
+```{r run_models, include=FALSE, cache=FALSE}
+source("analysis/models.R")
+```
+
+# Model 1: Ever Applied To College
+
+  * __Y:__ Ever applied to college. Based upon `F2NAPP2P`, which excludes open admissions colleges and includes any non-open admissions college at which a student enrolled.
+  * __Sample:__ All 10th graders in 2002.
+
+### Without `composite*difference` interaction
+```{r model_one}
+summary(model_1)
+```
+
+### With `composite*difference` interaction
+
+Model not shown. Model fit is not better:
+
+```{r model_one_ix_lrtest}
+model_1_ix_lrtest
+```
+
+# Model 2: Applied To A Selective College
+
+  * __Y:__ Ever applied to a selective college. Based upon the Barron's Profile of American Colleges (2004). Selective colleges are defined Most or Highly Competitive by the guide (levels 1 and 2 in the Barron's data file provided by NCES).
+  * __Sample:__ All 10th graders in 2002 who applied to any college.
+
+### Without `composite*difference` interaction
+```{r model_two}
+summary(model_2)
+```
+
+### With `composite*difference` interaction
+
+Model not shown. Model fit is not better:
+
+```{r model_two_ix_lrtest}
+model_2_ix_lrtest
+```
+
+# Model 3: Accepted To A Selective College
+
+  * __Y:__ Ever accepted to a selective college. Based upon the Barron's Profile of American Colleges (2004). Selective colleges are defined Most or Highly Competitive by the guide (levels 1 and 2 in the Barron's data file provided by NCES).
+  * __Sample:__ All 10th graders in 2002 who applied to any selective college.
+
+No significant relationship between math-verbal difference in acceptance rates to selective colleges among those who applied to them.
+
+
+```{r model_three}
+summary(model_3)
+```
+
+# Model 4: Applied To A Selective College
+
+  * __Y:__ Earned a degree within six years, calculated using `F3ATTAINMENT` composite (ever earned degree) in ELS02 and `F3PS2BA` (months to degree): must earn degree within 72 months of starting BA studies.
+  * __Sample:__ All 10th graders in 4004 who applied to any college.
+
+### Without `composite*difference` interaction
+```{r model_four}
+summary(model_4)
+```
+
+### With `composite*difference` interaction
+
+Fit is somewhat better. LR Test of nested models/coefficient has `p <= 0.0751`)
+
+```{r model_four_ix}
+summary(model_4_ix)
+```
+
+LR Test:
+
+```{r model_four_ix_lrtest}
+model_4_ix_lrtest
+```
+
+# p(Earn Degree Within Six Years) | Configuration
+
+```{r prob_matrix}
+prob_matrix
+cplot
+```
+
+
+# Other notes
+
+I ran a GLM, estimating a random effects for schools on Model 1. Coefficients as you'd expect were same. Very little change in errors. Model had some convergence issues. Probably we want to at least use cluster SEs before submitting anything. 
